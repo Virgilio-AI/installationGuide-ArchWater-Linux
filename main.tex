@@ -156,9 +156,51 @@
 	\begin{Large}
 		for non UEFI method
 	\end{Large}
+	\begin{minted}{sh}
+		# look for partitions
+		fdisk -l
+		# choose the partition where you want to install the operating system
+		# note, sda here is an example, you should choose the one you want
+		fdisk /dev/sda
+		# first delete all partitions with d
+		d
+		# create a dos partition table
+		o
+		# note, if you are asked to delete a signature just accept
+		# create the swap partition
+		n
+		# make it primary partition
+		p
+		<enter>
+		# give it 600 mega bytes
+		+600M
+		# change the partition type
+		t
+		# if you want to list the partition you can press L
+		L
+		# otherwise just press 82 for linux swap partition
+		82
+		# now create the main partition 
+		n
+		# make it primary
+		p
+		<enter>
+		# give it the whole size
+		<enter>
+		## now format the partitions and turn on the swap partition
+		mkfs.ext4 /dev/sda2
+		mkswap /dev/sda1
+		# mount the partitions
+		mount /dev/sda2 /mnt
+		swapon /dev/sda1
+		# this file is used for automaticly mount partitions 
+		genfstab -U -p /mnt >> /mnt/etc/fstab
+		# check if everything is fine 
+		cat /mnt/etc/fstab
+	\end{minted}
 \end{section}
 \newpage
-
+% ============================================= Install arch linux
 \begin{section}{Install Arch Linux}
 	 the following sections will be a lot less verbose and much simpler
 	 \begin{minted}{sh}
@@ -193,9 +235,13 @@
 	 \end{minted}
 \end{section}
 \newpage
+% ============================================== Installing grub
 \begin{section}{installing grub}
 	finally all has been done, 
 	but it still mising a boot manager
+	\begin{Large}
+		UEFI method
+	\end{Large}
 	\begin{minted}{sh}
 		#rceate directory
 		mkdir /boot/EFI
@@ -209,19 +255,48 @@
 		 cp /usr/share/locale/en\@quot/LC_MESSAGES/grub.mo /boot/grub/locale/en.mo
 		 #generate grub config file
 		 cp /usr/share/locale/en\@quot/LC_MESSAGES/grub.mo /boot/grub/locale/en.mo
+	\end{minted}
+	% === non uefi
+
+	\begin{Large}
+		non UEFI method
+	\end{Large}
+	\begin{minted}{sh}
+		# install grub
+		grub-install --target=i386-pc --recheck /dev/sda
+		# create the directory 
+		mkdir /boot/grub/locale
+
+		# copy the locale file to locale directory
+		cp /usr/share/locale/en\@quot/LC_MESSAGES/grub.mo /boot/grub/locale/en.mo
+		# generate grubs config file
+		grub-mkconfig -o /boot/grub/grub.cfg
 
 	\end{minted}
-\end{section}
 
+\end{section}
+% Installing arch water linux
 \newpage
 \begin{section}{Installing ArchWater Linux}
 now arch linux is fully working, is time to install arch water linux
 \begin{minted}{sh}
+	# select the folder of your user
+	cd home/<username>
 	#git clone the repository 
 	git clone https://github.com/Virgilio-AI/ArchWater-AutoInstaller.git archAutoInstaller
+	# exit arch-chroot
+	exit
+	# reboot and you sould be logged into arch linux
+	reboot
+	# now log in with your user and password
+	#
+	# maybe you will need to connect to the internet again
+	##
+	#
+
 	cd archAutoInstaller
 	sudo sh ArchWater-AutoInstaller.sh
-
+	# follow the installer and you should be good to go
 \end{minted}
 \end{section}
 
