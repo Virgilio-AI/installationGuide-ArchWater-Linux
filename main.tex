@@ -51,8 +51,27 @@
 			select Activate a connection
 		\item 
 			seelct your network and insert your password
+		\item
+			sync the time and date to avoid connection problems
+			\begin{minted}{sh}
+				timedatectl set-ntp true
+			\end{minted}
+		\item
+			update the arch linux keyring (the installation medium is very old)
+			\begin{minted}{sh}
+				pacman -S archlinux-keyring
+			\end{minted}
 
 	\end{enumerate}
+	note if pacman fails to download archlinux-keyring with 'core','extra','community' doesn't exist try installing the packages again with
+	\begin{minted}{sh}
+		pacman -Syy
+	\end{minted}
+	if the problem persist with 'could not open file' error try
+	\begin{minted}{sh}
+		rm -R /var/lib/pacman/sync/
+		pacman -Syy
+	\end{minted}
 	to test the internet you can check the connection to google
 	\begin{minted}{sh}
 		ping www.google.com
@@ -162,8 +181,11 @@
 		# choose the partition where you want to install the operating system
 		# note, sda here is an example, you should choose the one you want
 		fdisk /dev/sda
-		# first delete all partitions with d
+		# first delete all partitions
+		# repeat the following tree commands as many times as necesary
 		d
+		<enter>
+		<enter>
 		# create a dos partition table
 		o
 		# note, if you are asked to delete a signature just accept
@@ -172,8 +194,8 @@
 		# make it primary partition
 		p
 		<enter>
-		# give it 600 mega bytes
-		+600M
+		# give it 4GB mega bytes
+		+4GB
 		# change the partition type
 		t
 		# if you want to list the partition you can press L
@@ -190,12 +212,13 @@
 		## now format the partitions and turn on the swap partition
 		mkfs.ext4 /dev/sda2
 		mkswap /dev/sda1
+		# turn on the swap partition
+		swapon /dev/sda1
 		# mount the partitions
 		mount /dev/sda2 /mnt
-		swapon /dev/sda1
 		# this file is used for automaticly mount partitions 
-		genfstab -U -p /mnt >> /mnt/etc/fstab
-		# check if everything is fine 
+		genfstab -U /mnt >> /mnt/etc/fstab
+		# check if everything is fine
 		cat /mnt/etc/fstab
 	\end{minted}
 \end{section}
@@ -219,6 +242,8 @@
 		 systemctl enable NetworkManager
 		 # create the initial ramdisk for the kernel
 		 mkinitcpio -p linux-lts
+		 # syncronise the clock
+		 hwclock --systohc
 		 # uncomment the line from /etc/locale.gen file that corresponds to your locale
 		 nvim /etc/locale.gen (uncomment en_US.UTF-8)
 		 # generate the locate you just uncommented
